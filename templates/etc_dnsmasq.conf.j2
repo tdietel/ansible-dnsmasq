@@ -45,6 +45,21 @@ dhcp-host={{ host.mac }},{{ host.ip  }}{% if host.name is defined %},{{ host.nam
 {% endfor %}
 
 {% endif %}
+
+{% if dnsmasq_dns_cnames is defined %}
+{% for cname in dnsmasq_dns_cnames %}
+{% if cname.alias is iterable %}
+{# Multiple cnames for one target seem to be incompatible with dnsmasq on
+   CentOS 7. We therefore generate one cname per alias. #}
+{% for a in cname.alias %}
+cname={{ a }},{{ cname.target }}
+{% endfor %}
+{% else %}
+cname={{ cname.alias }},{{ cname.target }}
+{% endif %}
+{% endfor%}
+{% endif %}
+
 {% if dnsmasq_option_router is defined %}
 dhcp-option=option:router,{{ dnsmasq_option_router }}
 {% endif %}
